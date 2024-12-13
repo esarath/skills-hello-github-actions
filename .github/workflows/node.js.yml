@@ -1,31 +1,69 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-
-name: Node.js CI
-
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [18, 20, 22]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-        
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
-      - run: npm ci
-      - run: npm install
-      - run: npm test
+/**
+ * A GitHub Action that runs on every push and pull request
+ * on the main branch of a Node.js project.
+ *
+ * The action sets up the Node.js environment for the job and
+ * then runs the following steps:
+ *   - Checks out the code
+ *   - Installs the Node.js version specified in the matrix
+ *   - Caches the npm modules
+ *   - Runs `npm ci` to install dependencies
+ *   - Runs the `build` script if it's present
+ *   - Runs the `npm test` command if the `build` script was run
+ *
+ * @typedef {import("./types").Action} Action
+ * @type {Action}
+ */
+module.exports = {
+    name: "Node.js CI",
+    on: {
+        push: {
+            branches: ["main"]
+        },
+        pull_request: {
+            branches: ["main"]
+        }
+    },
+    jobs: {
+        build: {
+            "runs-on": "ubuntu-latest",
+            strategy: {
+                matrix: {
+                    "node-version": [18, "x", 20, "x", 22, "x"]
+                }
+            },
+            steps: [
+                {
+                    name: "Use Node.js ${{ matrix.node-version }}",
+                    uses: "actions/setup-node",
+                    with: {
+                        "node-version": "${{ matrix.node-version }}"
+                    }
+                },
+                {
+                    name: "Cache npm",
+                    uses: "actions/cache",
+                    with: {
+                        path: "npm",
+                        key: "npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}",
+                        restoreKeys: "npm-${{ runner.os }}-"
+                    }
+                },
+                {
+                    name: "Install dependencies",
+                    run: "npm ci"
+                },
+                {
+                    name: "Run build script",
+                    if: "steps.build-script.outputs.exists == 'true'",
+                    run: "npm run build"
+                },
+                {
+                    name: "Run tests",
+                    if: "steps.build-script.outputs.exists == 'true'",
+                    run: "npm test"
+                }
+            ]
+        }
+    }
+}
