@@ -3,7 +3,7 @@
  * on the main branch of a Node.js project.
  *
  * The action sets up the Node.js environment for the job and
- * then runs the following steps:
+ /* then runs the following steps:
  *   - Checks out the code
  *   - Installs the Node.js version specified in the matrix
  *   - Caches the npm modules
