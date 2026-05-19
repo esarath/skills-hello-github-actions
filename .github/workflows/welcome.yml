@@ -1,0 +1,6 @@
+name: Post welcome comment       # top-level key ✔
+on:                               # top-level key ✔
+  pull_request:                   # 2-space indent ✔
+    types: [opened]               # 4-space indent ✔
+permissions:                      # top-level key ✔
+  pull-requests: write            # 2-space indent ✔
