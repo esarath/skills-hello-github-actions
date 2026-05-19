@@ -1,3 +1,4 @@
+//concurrency: concurrency: 
 name: Post welcome comment
 on:
   pull_request:
